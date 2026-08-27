@@ -1,73 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Triangulate 1.21.8</title>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
 
-    body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #121212;
-        color: #ffffff;
-        font-family: 'Courier New', Courier, monospace;
-        overflow: hidden;
-    }
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    .typing-container {
-        font-size: 7rem;
-        font-weight: semi-bold;
-        letter-spacing: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        border-right: 4px solid #ffffff;
-        width: 26ch;
-        text-align: center;
-        animation: typing 5s steps(26) infinite, blink 0.9s step-end infinite alternate;
-    }
+    <meta
+        name="description"
+        content="Triangulate 1.21.8 — a free Minecraft triangulation tool."
+    >
 
-    @keyframes typing {
-        0%, 10% { width: 0; }
-        60% { width: 26ch; }
-        70%, 100% { width: 0; }
-    }
+    <meta
+        name="robots"
+        content="index, follow"
+    >
 
-    @keyframes blink {
-        50% { border-color: transparent; }
-    }
+    <meta
+        name="theme-color"
+        content="#121212"
+    >
 
-    .byline {
-        position: absolute;
-        bottom: 30px;
-        font-size: 1.5rem;
-        color: rgba(255,255,255,0.6);
-        font-family: 'Courier New', Courier, monospace;
-        letter-spacing: 1px;
-        text-align: center;
-    }
+    <meta
+        name="referrer"
+        content="strict-origin-when-cross-origin"
+    >
 
-    @media (max-width: 600px) {
+    <title>Triangulate</title>
+
+    <link
+        rel="icon"
+        type="image/svg+xml"
+        href="assets/favicon.svg"
+    >
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #121212;
+            --text: #ffffff;
+            --muted: rgba(255, 255, 255, 0.55);
+        }
+
+        html {
+            background: var(--background);
+        }
+
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            background: var(--background);
+            color: var(--text);
+
+            font-family:
+                "Courier New",
+                Courier,
+                monospace;
+
+            overflow: hidden;
+        }
+        main {
+            width: 100%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 20px;
+        }
+
         .typing-container {
-            font-size: 3rem;
-            width: 22ch;
+            display: inline-flex;
+            align-items: center;
+
+            font-size: 7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            line-height: 1.1;
+
+            white-space: nowrap;
+
+            text-shadow:
+                0 0 8px rgba(255, 255, 255, 0.08);
         }
+
+        #typing-text {
+            display: inline-block;
+        }
+
+        .cursor {
+            display: inline-block;
+
+            width: 4px;
+            height: 0.95em;
+
+            margin-left: 5px;
+
+            background: var(--text);
+
+            animation: cursor-blink 0.8s step-end infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%,
+            45% {
+                opacity: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+            }
+        }
+
         .byline {
-            font-size: 1rem;
+            position: fixed;
+            bottom: 30px;
+
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+
+            color: var(--muted);
+
+            text-align: center;
+
+            transition:
+                color 0.25s ease;
         }
-    }
-</style>
+
+        .byline:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 700px) {
+            .typing-container {
+                font-size: 3rem;
+                letter-spacing: 1px;
+            }
+
+            .cursor {
+                width: 3px;
+                margin-left: 4px;
+            }
+
+            .byline {
+                bottom: 24px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .typing-container {
+                font-size: 2.25rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cursor {
+                animation: none;
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <div class="typing-container">Work in Progress...</div>
-    <div class="byline">by SuspectKi</div>
+
+    <main>
+        <div
+            class="typing-container"
+            aria-label="Work in Progress"
+        >
+            <span id="typing-text"></span>
+            <span
+                class="cursor"
+                aria-hidden="true"
+            ></span>
+        </div>
+    </main>
+
+    <div class="byline">
+        by SuspectKi
+    </div>
+
+    <script>
+        const text = "Work in Progress...";
+        const element = document.getElementById("typing-text");
+
+        let index = 0;
+        let deleting = false;
+        function randomDelay(min, max) {
+            return Math.floor(
+                Math.random() * (max - min + 1)
+            ) + min;
+        }
+
+        function typewriter() {
+
+            if (!deleting) {
+                element.textContent =
+                    text.substring(0, index + 1);
+
+                index++;
+
+                if (index === text.length) {
+                    setTimeout(() => {
+                        deleting = true;
+                        typewriter();
+                    }, 1800);
+
+                    return;
+                }
+
+                setTimeout(
+                    typewriter,
+                    randomDelay(45, 95)
+                );
+
+            } else {
+                element.textContent =
+                    text.substring(0, index - 1);
+
+                index--;
+                if (index === 0) {
+
+                    deleting = false;
+                    setTimeout(
+                        typewriter,
+                        550
+                    );
+
+                    return;
+                }
+
+                setTimeout(
+                    typewriter,
+                    randomDelay(30, 70)
+                );
+            }
+        }
+        setTimeout(typewriter, 500);
+    </script>
+
 </body>
 </html>
